@@ -2,6 +2,8 @@
 Advanced retrieval with multi-query + ensemble + re-ranking
 """
 
+from dotenv import load_dotenv
+import os
 from langchain.retrievers import EnsembleRetriever
 from langchain_community.retrievers import BM25Retriever
 from langchain.prompts import PromptTemplate
@@ -10,7 +12,8 @@ import google.generativeai as genai
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
 
-GEMINI_API_KEY = "key"
+load_dotenv()  # Load environment variables from .env file
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=GEMINI_API_KEY)
 
 def analyze_query(query):
