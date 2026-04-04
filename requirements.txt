@@ -1,0 +1,7 @@
+langchain
+langgraph
+langchain-google-genai
+google-generativeai
+PyGithub
+langchain-community
+sentence-transformers
