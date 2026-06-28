@@ -2,13 +2,15 @@
 LangGraph agent orchestration
 """
 
+import os
+
 from langgraph.prebuilt import create_react_agent
 from langchain_google_genai import ChatGoogleGenerativeAI
 import google.generativeai as genai
+from pydantic import SecretStr
 from agent_tools import agent_tools
 
-GEMINI_API_KEY = "key" 
-genai.configure(api_key=GEMINI_API_KEY)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 
 def create_code_agent():
@@ -20,23 +22,23 @@ def create_code_agent():
     llm = ChatGoogleGenerativeAI(
         model="gemini-2.5-flash",
         temperature=0,
-        google_api_key=GEMINI_API_KEY
+        api_key=SecretStr(os.getenv("GEMINI_API_KEY", ""))
     )
     
     # System prompt for agent
     system_prompt = """You are a helpful code assistant with access to tools for searching and analyzing code.
 
-When a user asks a question:
-1. Decide which tool(s) to use
-2. Call the appropriate tool(s)  
-3. Provide a clear, helpful answer based on the tool results
+        When a user asks a question:
+        1. Decide which tool(s) to use
+        2. Call the appropriate tool(s)  
+        3. Provide a clear, helpful answer based on the tool results
 
-Available tools:
-- search_code: Find relevant code snippets
-- explain_code: Get detailed explanation of code
-- get_file_content: Retrieve full file content
+        Available tools:
+        - search_code: Find relevant code snippets
+        - explain_code: Get detailed explanation of code
+        - get_file_content: Retrieve full file content
 
-Be concise and cite sources when providing answers."""
+        Be concise and cite sources when providing answers."""
     
     # Create agent
     agent = create_react_agent(

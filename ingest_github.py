@@ -1,8 +1,15 @@
+import os
+
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.schema import Document
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
 from github import Github
+from dotenv import load_dotenv
+
+load_dotenv()  # Load environment variables from .env file
+github_token = os.getenv("GITHUB_TOKEN")
+print(github_token)
 
 def fetch_repo_files(repo_name, max_files=20):
     """
@@ -11,7 +18,7 @@ def fetch_repo_files(repo_name, max_files=20):
     print(f"Fetching from {repo_name}...")
     
     try:
-        g = Github()
+        g = Github(github_token) if github_token else Github()
         repo = g.get_repo(repo_name)
         
         documents = []

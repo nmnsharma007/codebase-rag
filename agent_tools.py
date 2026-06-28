@@ -4,13 +4,22 @@ Tools for LangGraph agent
 
 from langchain.tools import tool
 from retriever import AdvancedRetriever, load_vector_store
+from langchain_google_genai import ChatGoogleGenerativeAI
+import os
+from pydantic import SecretStr
+
 
 # Initialize retriever globally (loaded once)
 print("Loading vector store for agent tools...")
 vector_store = load_vector_store()
 retriever = AdvancedRetriever(vector_store)
-print("✓ Agent tools ready")
+print("Agent tools ready")
 
+explain_llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
+    temperature=0,
+    api_key=SecretStr(os.getenv("GEMINI_API_KEY", ""))
+)
 
 @tool
 def search_code(query: str) -> str:
@@ -60,10 +69,18 @@ def explain_code(code_snippet: str) -> str:
             code_snippet = docs[0].page_content
     
     # Return code with request for explanation
-    return f"""Code to explain:
-{code_snippet[:1000]}
-
-(This will be explained by the LLM in the agent flow)"""
+    prompt = f"""Explain this code clearly and concisely for a developer trying to understand it:
+        {code_snippet[:1500]}
+        Explain:
+        1. What it does
+        2. Key logic/algorithm used
+        3. Any notable patterns or gotchas"""
+    
+    response = explain_llm.invoke([prompt])
+    content = response.content
+    if isinstance(content, list):
+        content = " ".join([str(msg) for msg in content])
+    return content
 
 
 @tool  

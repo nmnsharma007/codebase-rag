@@ -11,10 +11,10 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 import google.generativeai as genai
 from langchain_community.embeddings import OllamaEmbeddings
 from langchain_community.vectorstores import Chroma
+from pydantic import SecretStr
 
 load_dotenv()  # Load environment variables from .env file
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=GEMINI_API_KEY)
 
 def analyze_query(query):
     """
@@ -58,7 +58,7 @@ class AdvancedRetriever:
         self.llm = ChatGoogleGenerativeAI(
             model="gemini-2.5-flash",
             temperature=0,
-            google_api_key=GEMINI_API_KEY
+            api_key=SecretStr(os.getenv("GEMINI_API_KEY", ""))
         )
         
         # Get all documents for BM25
@@ -208,7 +208,7 @@ class AdvancedRetriever:
             
             for i, metadata in enumerate(all_data['metadatas']):
                 source = metadata.get('source', '')
-                if filename_filter.lower() in source.lower():
+                if filename_filter in source.lower():
                     doc = Document(
                         page_content=all_data['documents'][i],
                         metadata=metadata
